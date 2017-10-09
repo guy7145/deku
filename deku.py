@@ -97,7 +97,7 @@ def driver_timeout_get_url(driver, url, timeout):
     return
 
 
-def generate_chrome_driver(load_timeout_seconds=5, player_quality='1080p'):
+def generate_chrome_driver(load_timeout_seconds, player_quality):
     options = webdriver.ChromeOptions()
     options.add_argument("--mute-audio")
     driver = webdriver.Chrome(chrome_options=options)
@@ -163,7 +163,8 @@ def download_file(url, file_path):
     return
 
 
-def download_episodes(anime_name, episodes_to_download, path, short_timeout=10, long_timeout=20, server_number=0):
+def download_episodes(anime_name, episodes_to_download, path, player_quality='1080p',
+                      server_number=0, short_timeout=10, long_timeout=20):
     path = path + '\\' + anime_name
 
     log('downloading {} (episodes {}) from server {} to path \'{}\''.format(anime_name,
@@ -184,7 +185,7 @@ def download_episodes(anime_name, episodes_to_download, path, short_timeout=10, 
     episode_links = [get_absolute_url(series_url, episode_links[key]) for key in episode_links.keys()]
 
     log('opening browser...')
-    chrome = generate_chrome_driver(load_timeout_seconds=short_timeout)
+    chrome = generate_chrome_driver(load_timeout_seconds=short_timeout, player_quality=player_quality)
     log('downloading {} episodes {}'.format(anime_name, episodes_to_download))
     for i in episodes_to_download:
         ep_index = i - 1
