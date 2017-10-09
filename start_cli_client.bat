@@ -1,0 +1,1 @@
+ipython -i deku_cli_api.py
