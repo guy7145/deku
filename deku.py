@@ -97,12 +97,13 @@ def driver_timeout_get_url(driver, url, timeout):
     return
 
 
-def generate_chrome_driver(load_timeout_seconds, player_quality):
+def generate_chrome_driver(player_quality, load_timeout_seconds=5):
     options = webdriver.ChromeOptions()
     options.add_argument("--mute-audio")
     driver = webdriver.Chrome(chrome_options=options)
-    driver_timeout_get_url(driver, base_url, load_timeout_seconds)
-    driver.execute(Command.SET_LOCAL_STORAGE_ITEM, {'key': 'player_quality', 'value': player_quality})
+    if player_quality is not None:
+        driver_timeout_get_url(driver, base_url, load_timeout_seconds)
+        driver.execute(Command.SET_LOCAL_STORAGE_ITEM, {'key': 'player_quality', 'value': player_quality})
     return driver
 
 
