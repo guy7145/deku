@@ -41,7 +41,7 @@ downloads <i>anime_name</i> to "<i>./path/anime_name</i>"
 <br><br>
 <i>episodes</i>: list (or other form of iterable) of episode to download.
 <br><br>
-<i>player_quality</i>: either '360p', '480p', '720p' or '1080p'. works on server 0, not tested on other servers. if the requested quality usn't available, there's no guarantee on the quality the episodes will be downloaded in.
+<i>player_quality</i>: either '360p', '480p', '720p' or '1080p'. works on server 0, not tested on other servers. if the requested quality isn't available, there's no guarantee on the quality the episodes will be downloaded in.
 <br><br>
 <i>server_number</i>: the server to download the episodes from.
 <br><br>
