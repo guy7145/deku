@@ -3,13 +3,19 @@ import re
 import deku
 from bs4 import BeautifulSoup
 
+
 def search(anime_name):
-    res = deku.search_series_urls_by_name(anime_name)
-    print('\n'.join(res))
+    print('\n'.join(deku.search_series_urls_by_name(anime_name)))
     return
 
 
-find = deku.find_series_url_by_name
+find_exact = deku.find_series_url_by_name
+find = find_exact
+
+find_by_keywords = deku.find_series_urls_by_keywords
+
+
+find_by_substring = deku.find_series_urls_by_name_substring
 
 
 def check(anime_name):

@@ -5,6 +5,7 @@ from urllib.request import Request, urlopen, urlretrieve, FancyURLopener
 from bs4 import BeautifulSoup
 from selenium import webdriver
 import re
+import itertools
 
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.remote.command import Command
@@ -44,6 +45,20 @@ def search_series_urls_by_name(name):
     page = fetch_url(base_url + "/search?keyword=" + name.replace(' ', '+'))
     results = [line for line in page.split('\"') if base_watch_url in line]
     return set(results)
+
+
+def find_series_urls_by_name_substring(name):
+    return [url for url in search_series_urls_by_name(name) if url.find(name.replace(' ', '-')) >= 0]
+
+
+def find_series_urls_by_keywords(name):
+    def is_match(url):
+        for keyword in name.split(' '):
+            if url.find(keyword) == -1:
+                return False
+        return True
+
+    return [url for url in search_series_urls_by_name(name) if is_match(url)]
 
 
 def find_series_url_by_name(name):
