@@ -205,9 +205,8 @@ def download_episodes(anime_name, episodes_to_download, path, player_quality='10
     log('opening browser...')
     chrome = generate_chrome_driver(load_timeout_seconds=short_timeout, player_quality=player_quality)
     log('downloading {} episodes {}'.format(anime_name, episodes_to_download))
-    for i in episodes_to_download:
-        ep_index = i - 1
-        log('finding episode {} download link...'.format(i))
+    for ep_index in episodes_to_download:
+        log('finding episode {} download link...'.format(ep_index))
         try:
             download_url = get_download_url_from_ep_watch_url(episode_links[ep_index], chrome, load_timeout_seconds=short_timeout)
         except:
@@ -215,7 +214,7 @@ def download_episodes(anime_name, episodes_to_download, path, player_quality='10
         finally:
             if not os.path.exists(path):
                 os.makedirs(path)
-            download_file(download_url, "{}/ep{}.mp4".format(path, i))
+            download_file(download_url, "{}/ep{}.mp4".format(path, ep_index))
             download_url = "no url"
 
     chrome.quit()
