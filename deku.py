@@ -193,10 +193,11 @@ def download_episodes(anime_name, episodes_to_download, path, player_quality='10
     servers, latest_ep = get_episodes_watch_urls(fetch_url(series_url))
 
     episode_links = servers[server_number]
-    episode_links = [get_absolute_url(series_url, episode_links[key]) for key in episode_links.keys()]
+    for key in episode_links.keys():
+        episode_links[key] = get_absolute_url(series_url, episode_links[key])
 
-    discarded_episodes = [ep for ep in episodes_to_download if ep not in episode_links]
-    episodes_to_download = [ep for ep in episodes_to_download if ep in episode_links]
+    discarded_episodes = [ep for ep in episodes_to_download if ep not in episode_links.keys()]
+    episodes_to_download = [ep for ep in episodes_to_download if ep in episode_links.keys()]
     if len(discarded_episodes) > 0:
         warning('episodes {} not found; downloading only episodes {}'.format(discarded_episodes, episodes_to_download))
 
