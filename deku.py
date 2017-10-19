@@ -123,7 +123,7 @@ def generate_chrome_driver(player_quality, load_timeout_seconds=5):
 
 
 def get_download_url_from_ep_watch_url(episode_url, chrome, load_timeout_seconds=10):
-    download_server_url = 'https://3.bp.blogspot.com/'
+    download_server_url = 'https://storage.googleapis.com/'
     driver_timeout_get_url(chrome, episode_url, load_timeout_seconds)
     source = chrome.page_source
     soup = BeautifulSoup(source, 'html.parser')
