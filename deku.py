@@ -192,13 +192,14 @@ def download_episodes(anime_name, episodes_to_download, path, player_quality='10
     log('fetching episodes urls...')
     servers, latest_ep = get_episodes_watch_urls(fetch_url(series_url))
 
-    discarded_episodes = [ep for ep in episodes_to_download if ep > latest_ep]
-    episodes_to_download = [ep for ep in episodes_to_download if ep <= latest_ep]
+    episode_links = servers[server_number]
+    episode_links = [get_absolute_url(series_url, episode_links[key]) for key in episode_links.keys()]
+
+    discarded_episodes = [ep for ep in episodes_to_download if ep not in episode_links]
+    episodes_to_download = [ep for ep in episodes_to_download if ep in episode_links]
     if len(discarded_episodes) > 0:
         warning('episodes {} not found; downloading only episodes {}'.format(discarded_episodes, episodes_to_download))
 
-    episode_links = servers[server_number]
-    episode_links = [get_absolute_url(series_url, episode_links[key]) for key in episode_links.keys()]
 
     log('opening browser...')
     chrome = generate_chrome_driver(load_timeout_seconds=short_timeout, player_quality=player_quality)
