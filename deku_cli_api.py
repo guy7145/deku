@@ -51,3 +51,8 @@ def estimate(anime_name, load_timeout_seconds=5):
 
 def download(anime_name, episodes, path='./', *args, **kwargs):
     return deku.download_episodes(anime_name=anime_name, episodes_to_download=episodes, path=path, *args, **kwargs)
+
+
+def download_by_url(series_url, anime_name, episodes, path='./', *args, **kwargs):
+    return deku.download_episodes_by_url(series_url=series_url, anime_name=anime_name, episodes_to_download=episodes,
+                                         path=path, *args, **kwargs)

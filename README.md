@@ -35,7 +35,7 @@ airing time and date of the next episode (if exists)
 
 
 ### Downloading
-##### <i>download(anime_name, episodes, path='./', player_quality='1080p', server_number=0, short_timeout=10, long_timeout=20)</i>
+#### <i>download(anime_name, episodes, path='./', player_quality='1080p', server_number=0, short_timeout=10, long_timeout=20)</i>
 downloads <i>anime_name</i> to "<i>./path/anime_name</i>"
 (a directory named "<i>anime_name</i>" will be created if doesnt exist, and the episodes will be downloaded there).
 <br><br>
@@ -46,4 +46,14 @@ downloads <i>anime_name</i> to "<i>./path/anime_name</i>"
 <i>server_number</i>: the server to download the episodes from.
 <br><br>
 timeouts: the time chrome spends loading the page before requesting for the source. if using the short_timeout the requested links weren't found, long_timeout will be tried instead. if the links still can't be found, an error will be raised.
+<br><br>
+
+#### <i>download_by_url(series_url, anime_name, episodes, path='./', player_quality='1080p', server_number=0, short_timeout=10, long_timeout=20)</i>
+downloads <i>anime_name</i> to "<i>./path/anime_name</i>", from the specified url: <i>series_url</i>; (a directory named "<i>anime_name</i>" will be created if doesnt exist, and the episodes will be downloaded there).
 <br>
+<strong>** use this function in case the normal download function fails to find the <i>watch url</i> (an indicator is when the '<i>find</i>' function fails)</strong>
+<br><br>
+<i>series_url</i>: the base url for the specified anime
+<br>
+example: https://9anime.to/watch/one-punch-man.928
+<br><br>

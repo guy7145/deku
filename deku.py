@@ -154,7 +154,7 @@ def report_progress(done, total, report_string_format, suffix='', progress_bar_l
 
 def download_file(url, file_path):
     log('downloading: {} -> {}'.format(url, file_path))
-    url = url.replace(' ', '%20')
+    url = urllib.parse.quote(url, safe='$-_.+!*\'(),;/?:@=&')
     urllib.request.URLopener.version = friendly_user_agent
 
     ds = DownloadStatistics()
@@ -181,41 +181,43 @@ def download_file(url, file_path):
 
 def download_episodes(anime_name, episodes_to_download, path, player_quality='1080p',
                       server_number=0, short_timeout=10, long_timeout=20):
-    path = path + '\\' + anime_name
-
     log('downloading {} (episodes {}) from server {} to path \'{}\''.format(anime_name,
                                                                             episodes_to_download,
                                                                             server_number,
                                                                             path))
     log('fetching series url...')
     series_url = find_series_url_by_name(anime_name)
+    download_episodes_by_url(series_url, anime_name, episodes_to_download, path, player_quality, server_number,
+                             short_timeout, long_timeout)
+    return
+
+
+def download_episodes_by_url(series_url, anime_name, episodes_to_download, path, player_quality='1080p',
+                             server_number=0, short_timeout=10, long_timeout=20):
+    path = path + '\\' + anime_name
     log('fetching episodes urls...')
     servers, latest_ep = get_episodes_watch_urls(fetch_url(series_url))
-
     episode_links = servers[server_number]
     for key in episode_links.keys():
         episode_links[key] = get_absolute_url(series_url, episode_links[key])
-
     discarded_episodes = [ep for ep in episodes_to_download if ep not in episode_links.keys()]
     episodes_to_download = [ep for ep in episodes_to_download if ep in episode_links.keys()]
     if len(discarded_episodes) > 0:
         warning('episodes {} not found; downloading only episodes {}'.format(discarded_episodes, episodes_to_download))
-
-
     log('opening browser...')
     chrome = generate_chrome_driver(load_timeout_seconds=short_timeout, player_quality=player_quality)
     log('downloading {} episodes {}'.format(anime_name, episodes_to_download))
     for ep_index in episodes_to_download:
         log('finding episode {} download link...'.format(ep_index))
         try:
-            download_url = get_download_url_from_ep_watch_url(episode_links[ep_index], chrome, load_timeout_seconds=short_timeout)
+            download_url = get_download_url_from_ep_watch_url(episode_links[ep_index], chrome,
+                                                              load_timeout_seconds=short_timeout)
         except:
-            download_url = get_download_url_from_ep_watch_url(episode_links[ep_index], chrome, load_timeout_seconds=long_timeout)
+            download_url = get_download_url_from_ep_watch_url(episode_links[ep_index], chrome,
+                                                              load_timeout_seconds=long_timeout)
         finally:
             if not os.path.exists(path):
                 os.makedirs(path)
             download_file(download_url, "{}/ep{}.mp4".format(path, ep_index))
             download_url = "no url"
-
     chrome.quit()
-    return
