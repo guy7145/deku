@@ -116,21 +116,33 @@ class ServerSpecificCrawler:
 
 
 class RapidVideo(ServerSpecificCrawler):
+    QUALITY_ORDER = (1080, 720, 480, 360)
+
     def _find_download_url(self, ep_page_html):
         soup = BeautifulSoup(ep_page_html, SOUP_PARSER_HTML)
         link = soup.find('iframe', attrs={'allowfullscreen': 'yes'})['src']
-        link = link[:link.index('?')]   # no 'autostart=True' parameter
+        # link = link[:link.index('?')]   # no 'autostart=True' parameter
         self._navigate(link)
+        sleep(3)
         actual_page = self.driver.page_source
         soup = BeautifulSoup(actual_page, SOUP_PARSER_HTML)
-        return soup.find('video').find('source')['src']
+        home_video_div = soup.find('div', id='home_video')
+        links = [a['href'] for a in home_video_div.find_all('a')]
+        log('links found in RapidVideo: {}'.format(links))
+        for q in RapidVideo.QUALITY_ORDER:
+            for link in links:
+                if '&q={}p'.format(q) in link:
+                    log('highest resolution found: {}p'.format(q))
+                    soup = BeautifulSoup(fetch_url(link), SOUP_PARSER_HTML)
+                    return soup.find('source')['src']
+        raise RuntimeError('can\'t find download link')
 
     def get_server_name(self):
         return 'RapidVideo'
 
     def set_quality(self, requested_quality):
-        self._navigate('https://www.rapidvideo.com/')
-        self.driver.add_cookie({'name': 'q', 'value': str(requested_quality), 'domain': '.rapidvideo.com'})
+        # self._navigate('https://www.rapidvideo.com/')
+        # self.driver.add_cookie({'name': 'q', 'value': str(requested_quality), 'domain': '.rapidvideo.com'})
         return
 
     def highest_quality(self):
@@ -195,8 +207,8 @@ class F2(G3F4AndWhatever):
 if __name__ == '__main__':
     s = RapidVideo()
     try:
-        s.download_episodes(find_series_url_by_name('shokugeki no souma san no sara'),
-                            requested_episodes=[5],
+        s.download_episodes(find_series_url_by_name('shokugeki no souma'),
+                            requested_episodes=[2, 1, 3, 4, 5, 6],
                             download_path='.\\downloaded',
                             quality=None)
     finally:
