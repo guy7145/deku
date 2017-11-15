@@ -28,9 +28,9 @@ example: find_by_keywords('one road punch') will find 'one punch man road to her
 finds (using <i>find</i>) <i>anime_name</i>'s page and prints how many episodes were found
 <br><br>
 
-##### <s><i>estimate(anime_name)</i>
+##### <strike><i>estimate(anime_name)</i>
 prints how many episodes were found for <i>anime_name</i> + an estimate of the 
-airing time and date of the next episode (if exists)</s>
+airing time and date of the next episode (if exists)</strike>
 <br><br>
 
 
