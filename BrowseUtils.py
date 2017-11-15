@@ -18,7 +18,7 @@ MEGA = 2**20
 
 
 def make_safe_url(url):
-    return urllib.parse.quote(url, safe='$-_.+!*\'(),;/?:@=&')
+    return urllib.parse.quote(url, safe='$-_.+!*\'(),;/?:@=&%')
 
 
 def create_request(url):
@@ -63,10 +63,6 @@ def __draw_progressbar(done, total, report_string_format, progress_bar_length=30
 
 def download_file(url, file_path):
     log('downloading: {} -> {}'.format(url, file_path))
-    args_index = url.index('?')
-    error(args_index)
-    error(url[:args_index])
-    error(url[args_index:])
     url = make_safe_url(url)
     download_statistics = DownloadStatistics()
 
@@ -92,8 +88,6 @@ def download_file(url, file_path):
                            progress_bar_length=50)
         return
 
-    warning(url)
-    warning(file_path)
     headers = {'User-Agent': friendly_user_agent}
     response = requests.get(url, stream=True, headers=headers)
     chunk_size = 4096

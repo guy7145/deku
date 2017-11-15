@@ -8,8 +8,8 @@ base_watch_url = "https://9anime.to/watch"
 def search_series_urls_by_name(name):
     log('searching "{}"'.format(name))
     page = fetch_url(base_url + "/search?keyword=" + name.replace(' ', '+'))
-    results = [line for line in page.split('\"') if base_watch_url in line]
-    return set(results)
+    results = {line for line in page.split('\"') if base_watch_url in line}
+    return list(results)
 
 
 def find_series_urls_by_name_substring(name):
