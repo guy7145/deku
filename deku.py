@@ -24,6 +24,8 @@ def download_episodes_by_url(series_url, anime_name, episodes_to_download, path,
                                  requested_episodes=episodes_to_download,
                                  quality=player_quality,
                                  download_path=path)
+    except Exception as e:
+        error(e)
     finally:
         server.close()
     return

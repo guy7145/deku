@@ -141,8 +141,7 @@ class G3F4AndWhatever(ServerSpecificCrawler):
                 download_link = ref
 
         if download_link is None:
-            error('no download link found')
-            raise RuntimeError
+            raise RuntimeError('no download link found')
 
         return download_link
 
