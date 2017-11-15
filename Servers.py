@@ -1,4 +1,5 @@
 import os
+from time import sleep
 
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.remote.command import Command
@@ -60,7 +61,7 @@ class ServerSpecificCrawler:
         log('Crawler for {} is down.'.format(self.get_server_name()))
         return
 
-    def __navigate(self, url):
+    def _navigate(self, url):
         return driver_timeout_get_url(self.driver, url)
 
     def _find_episode_watch_links(self, series_page_html):
@@ -100,9 +101,9 @@ class ServerSpecificCrawler:
         # end of user stuff
 
         episodes_to_download = [ep for ep in available_episodes if ep.ep_number in requested_episodes]
+        self.set_quality(quality)
         for ep in episodes_to_download:
-            self.__navigate(get_absolute_url(series_page_url, relative_url=ep.ep_id))
-            self.set_quality(quality)
+            self._navigate(get_absolute_url(series_page_url, relative_url=ep.ep_id))
             download_url = self._find_download_url(self.driver.page_source)
             log('found download url for episode {}!'.format(ep.ep_number))
             if not os.path.exists(download_path):
@@ -114,13 +115,31 @@ class ServerSpecificCrawler:
         return self.get_server_name()
 
 
+class RapidVideo(ServerSpecificCrawler):
+    def _find_download_url(self, ep_page_html):
+        soup = BeautifulSoup(ep_page_html, SOUP_PARSER_HTML)
+        link = soup.find('iframe', attrs={'allowfullscreen': 'yes'})['src']
+        link = link[:link.index('?')]   # no 'autostart=True' parameter
+        self._navigate(link)
+        actual_page = self.driver.page_source
+        soup = BeautifulSoup(actual_page, SOUP_PARSER_HTML)
+        return soup.find('video').find('source')['src']
+
+    def get_server_name(self):
+        return 'RapidVideo'
+
+    def set_quality(self, requested_quality):
+        self._navigate('https://www.rapidvideo.com/')
+        self.driver.add_cookie({'name': 'q', 'value': str(requested_quality), 'domain': '.rapidvideo.com'})
+        return
+
+    def highest_quality(self):
+        return 1080
+
+
 class G3F4AndWhatever(ServerSpecificCrawler):
     QUALITIES = {1080: '1080p', 720: '720p', 480: '480p', 360: '360p'}
     HIGHEST_QUALITY = 1080
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        return
 
     def get_server_name(self):
         raise NotImplementedError
@@ -147,7 +166,7 @@ class G3F4AndWhatever(ServerSpecificCrawler):
 
     def set_quality(self, requested_quality):
         requested_quality = G3F4AndWhatever.QUALITIES[requested_quality]
-
+        self._navigate('https://9anime.to/')
         current_quality = self.driver.execute(Command.GET_LOCAL_STORAGE_ITEM, {'key': 'player_quality'})['value']
         if current_quality is not None:
             current_quality = current_quality.lower()
@@ -155,10 +174,6 @@ class G3F4AndWhatever(ServerSpecificCrawler):
         if current_quality != requested_quality.lower():
             log('current quality: {}; changing to {}...'.format(current_quality, requested_quality))
             self.driver.execute(Command.SET_LOCAL_STORAGE_ITEM, {'key': 'player_quality', 'value': requested_quality})
-            try:
-                self.driver.refresh()
-            except TimeoutException:
-                pass
         return
 
 
@@ -175,3 +190,14 @@ class F4(G3F4AndWhatever):
 class F2(G3F4AndWhatever):
     def get_server_name(self):
         return 'Server F2'
+
+
+if __name__ == '__main__':
+    s = RapidVideo()
+    try:
+        s.download_episodes(find_series_url_by_name('shokugeki no souma san no sara'),
+                            requested_episodes=[5],
+                            download_path='.\\downloaded',
+                            quality=None)
+    finally:
+        s.close()
