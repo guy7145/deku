@@ -24,31 +24,29 @@ example: find_by_keywords('one road punch') will find 'one punch man road to her
 <br><br>
 
 ### Gathering info and updates
-##### <i>check(anime_name) </i>
+##### <i>info(anime_name)</i>
 finds (using <i>find</i>) <i>anime_name</i>'s page and prints how many episodes were found
 <br><br>
 
-##### <i>estimate(anime_name)</i>
+##### <s><i>estimate(anime_name)</i>
 prints how many episodes were found for <i>anime_name</i> + an estimate of the 
-airing time and date of the next episode (if exists)
+airing time and date of the next episode (if exists)</s>
 <br><br>
 
 
 ### Downloading
-#### <i>download(anime_name, episodes, path='./', player_quality='1080p', server_number=0, timeouts=(5, 10, 20))</i>
+#### <i>download(anime_name, episodes, path='.', player_quality='1080p', server=G3())</i>
 downloads <i>anime_name</i> to "<i>./path/anime_name</i>"
-(a directory named "<i>anime_name</i>" will be created if doesnt exist, and the episodes will be downloaded there).
+(a directory named "<i>anime_name</i>" will be created if doesn't exist, and the episodes will be downloaded there).
 <br><br>
 <i>episodes</i>: list (or other form of iterable) of episode to download.
 <br><br>
 <i>player_quality</i>: either '360', '480', '720' or '1080' (notice: no 'p'). works on server 0, not tested on other servers. if the requested quality isn't available, there's no guarantee on the quality the episodes will be downloaded in.
 <br><br>
-<i>server_number</i>: the server to download the episodes from.
-<br><br>
-timeouts: the time chrome spends loading the page before requesting for the source. if while using timeouts[i] the requested links weren't found, timeouts[i+1] will be tried and so on. if the links still can't be found at the end, an error will be raised.
+<i>server</i>: the server to use (right now only G3 is supported so you actually have no choice here, leave it empty)
 <br><br>
 
-#### <i>download_by_url(series_url, anime_name, episodes, path='./', player_quality='1080p', server_number=0, timeouts=(5, 10, 20))</i>
+#### <i>download_by_url(series_url, anime_name, episodes, path='.', player_quality='1080p', server=G3())</i>
 downloads <i>anime_name</i> to "<i>./path/anime_name</i>", from the specified url: <i>series_url</i>; (a directory named "<i>anime_name</i>" will be created if doesnt exist, and the episodes will be downloaded there).
 <br>
 <strong>** use this function in case the normal download function fails to find the <i>watch url</i> (an indicator is when the '<i>find</i>' function fails)</strong>
