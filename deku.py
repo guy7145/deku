@@ -1,129 +1,51 @@
 import os
-import urllib
-from math import inf
-from urllib.request import Request, urlopen, urlretrieve, FancyURLopener
-from bs4 import BeautifulSoup
-from selenium import webdriver
 import re
-import itertools
 
-from selenium.common.exceptions import TimeoutException
+from bs4 import BeautifulSoup
 from selenium.webdriver.remote.command import Command
 
-from DownloadStatistics import DownloadStatistics
-from log import warning, error
-
-base_url = "http://9anime.to"
-base_watch_url = "https://9anime.to/watch"
-friendly_user_agent = 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'
-
-KILO = 2**10
-MEGA = 2**20
-MICRO = 10**6
+from BrowseUtils import fetch_url, get_absolute_url, driver_timeout_get_url, generate_chrome_driver, download_file
+from Site9AnimeStuff import base_url, find_series_url_by_name
+from log import warning, error, log
 
 
-def log(txt, *args, **kwargs):
-    print(txt, *args, **kwargs)
-    return
+# def get_episodes_watch_urls(series_page):
+#     lines = [line.lstrip("<a ") for line in series_page.split('>') if 'data-base' in line]
+#
+#     episodes = dict()
+#     servers = [episodes]
+#     last_ep = 0
+#     latest_ep = 0
+#     for line in lines:
+#         ep_number = int(re.search('data-base="(.{1,4})"', line).group(1))
+#         ep_id = re.search('data-id="(.{6})"', line).group(1)
+#
+#         if ep_number <= last_ep:
+#             episodes = dict()
+#             servers.append(episodes)
+#             latest_ep = last_ep
+#
+#         episodes[ep_number] = ep_id
+#         last_ep = ep_number
+#
+#     log('found {} episodes in {} servers'.format(latest_ep, len(servers)))
+#     return servers, latest_ep
 
 
-def create_request(url):
-    user_agent = 'Mozilla/5.0'
-    log('using user agent {}'.format(user_agent))
-    return Request(url, headers={'User-Agent': user_agent})
-
-
-def fetch_url(url):
-    log('fetching {}'.format(url))
-    req = create_request(url)
-    with urlopen(req) as page:
-        return str(page.read())
-
-
-def search_series_urls_by_name(name):
-    log('searching "{}"'.format(name))
-    page = fetch_url(base_url + "/search?keyword=" + name.replace(' ', '+'))
-    results = [line for line in page.split('\"') if base_watch_url in line]
-    return set(results)
-
-
-def find_series_urls_by_name_substring(name):
-    return [url for url in search_series_urls_by_name(name) if url.find(name.replace(' ', '-')) >= 0]
-
-
-def find_series_urls_by_keywords(name):
-    def is_match(url):
-        for keyword in name.split(' '):
-            if url.find(keyword) == -1:
-                return False
-        return True
-
-    return [url for url in search_series_urls_by_name(name) if is_match(url)]
-
-
-def find_series_url_by_name(name):
-    search_pattern = name.replace(' ', '-') + '.'
-    possible_results = search_series_urls_by_name(name)
-    results = [res for res in possible_results if search_pattern in res]
-    if len(results) == 0:
-        log("watching page of {} couldn't be found. please check for typos.".format(name))
-        raise
-    elif len(results) > 1:
-        log("more than 1 result were found for {}, choosing the first one;".format(name))
-
-    result = results[0]
-    log('found watching page of {}: {}'.format(name, result))
-    return result
-
-
-def get_episodes_watch_urls(series_page):
-    lines = [line.lstrip("<a ") for line in series_page.split('>') if 'data-base' in line]
-
-    episodes = dict()
-    servers = [episodes]
-    last_ep = 0
-    latest_ep = 0
-    for line in lines:
-        ep_number = int(re.search('data-base="(.{1,4})"', line).group(1))
-        ep_id = re.search('data-id="(.{6})"', line).group(1)
-
-        if ep_number <= last_ep:
-            episodes = dict()
-            servers.append(episodes)
-            latest_ep = last_ep
-
-        episodes[ep_number] = ep_id
-        last_ep = ep_number
-
-    log('found {} episodes in {} servers'.format(latest_ep, len(servers)))
-    return servers, latest_ep
-
-
-def get_absolute_url(domain, relative_url):
-    return "{}/{}".format(domain, relative_url)
-
-
-def driver_timeout_get_url(driver, url, timeout):
-    driver.execute(Command.SET_TIMEOUTS, {'ms': float(timeout * 1000), 'type': 'page load'})
-    try:
-        driver.get(url)
-    except TimeoutException:
-        log('timeout!')
-    return
-
-
-def generate_chrome_driver(player_quality, load_timeout_seconds=5):
-    options = webdriver.ChromeOptions()
-    options.add_argument("--mute-audio")
-    driver = webdriver.Chrome(chrome_options=options)
-    if player_quality is not None:
-        driver_timeout_get_url(driver, base_url, load_timeout_seconds)
-        driver.execute(Command.SET_LOCAL_STORAGE_ITEM, {'key': 'player_quality', 'value': player_quality})
-    return driver
+# def set_driver_quality(driver, requested_quality):
+#     current_quality = driver.execute(Command.GET_LOCAL_STORAGE_ITEM, {'key': 'player_quality'})['value']
+#
+#     if current_quality is not None:
+#         current_quality = current_quality.lower()
+#
+#     if current_quality != requested_quality.lower():
+#         driver.execute(Command.SET_LOCAL_STORAGE_ITEM, {'key': 'player_quality', 'value': requested_quality})
+#         driver.refresh()
+#     return
 
 
 def get_download_url_from_ep_watch_url(episode_url, chrome, load_timeout_seconds=10):
-    download_server_url = 'https://storage.googleapis.com/'
+    download_url_pattern = 'googleusercontent'
     driver_timeout_get_url(chrome, episode_url, load_timeout_seconds)
     source = chrome.page_source
     soup = BeautifulSoup(source, 'html.parser')
@@ -131,69 +53,44 @@ def get_download_url_from_ep_watch_url(episode_url, chrome, load_timeout_seconds
     download_link = None
     for link in soup.find_all('a'):
         ref = link.get('href')
-        if download_server_url in str(ref):
+        if download_url_pattern in str(ref):
             if download_link is not None:
                 error('more than one download link found; {}, {}'.format(download_link, ref))
             download_link = ref
 
     if download_link is None:
         error('no download link found')
-        raise
+        raise RuntimeError
 
     log('found download link: {} (watch link: {})'.format(download_link, episode_url))
     return download_link
 
 
-def report_progress(done, total, report_string_format, suffix='', progress_bar_length=30):
-    bar_done = '#' * int(progress_bar_length * done/total)
-    bar_left = '-' * int(progress_bar_length * (total - done)/total)
-    percentage = done/total
-    print('\r' + report_string_format.format(bar=bar_done + bar_left, percentage=percentage), end='')
-    return
-
-
-def download_file(url, file_path):
-    log('downloading: {} -> {}'.format(url, file_path))
-    url = urllib.parse.quote(url, safe='$-_.+!*\'(),;/?:@=&')
-    urllib.request.URLopener.version = friendly_user_agent
-
-    ds = DownloadStatistics()
-
-    def my_reporthook(count, block_size, total):
-        ds.report_block_downloaded(block_size)
-        size_megabytes = total / MEGA
-        done_megabytes = count * block_size / MEGA
-        speed_megabytes = ds.get_speed()/MEGA
-        estimated = (size_megabytes - done_megabytes)/speed_megabytes if speed_megabytes != 0 else inf
-        report_format = '\t{:.2f}MBps\t{:.2f}/{:.2f} (MB)\tEst: {:.2f} minutes'
-        report_format = report_format.format(speed_megabytes, done_megabytes, size_megabytes, estimated / 60)
-        report_progress(count*block_size,
-                        total,
-                        '[{bar}]{percentage:.2%}'+report_format,
-                        progress_bar_length=50)
-        return
-
-    urlretrieve(url=url, filename=file_path, reporthook=my_reporthook)
-    print()
-    log('finished downloading {}'.format(file_path))
-    return
-
-
 def download_episodes(anime_name, episodes_to_download, path, player_quality='1080p',
-                      server_number=0, short_timeout=10, long_timeout=20):
+                      server_number=0, timeouts=(5, 10, 20)):
     log('downloading {} (episodes {}) from server {} to path \'{}\''.format(anime_name,
                                                                             episodes_to_download,
                                                                             server_number,
                                                                             path))
     log('fetching series url...')
     series_url = find_series_url_by_name(anime_name)
-    download_episodes_by_url(series_url, anime_name, episodes_to_download, path, player_quality, server_number,
-                             short_timeout, long_timeout)
+    download_episodes_by_url(series_url,
+                             anime_name,
+                             episodes_to_download,
+                             path,
+                             player_quality,
+                             server_number,
+                             timeouts)
     return
 
 
-def download_episodes_by_url(series_url, anime_name, episodes_to_download, path, player_quality='1080p',
-                             server_number=0, short_timeout=10, long_timeout=20):
+def download_episodes_by_url(series_url,
+                             anime_name,
+                             episodes_to_download,
+                             path,
+                             player_quality='1080p',
+                             server_number=0,
+                             timeouts=(5, 10, 20)):
     path = path + '\\' + anime_name
     log('fetching episodes urls...')
     servers, latest_ep = get_episodes_watch_urls(fetch_url(series_url))
@@ -205,19 +102,29 @@ def download_episodes_by_url(series_url, anime_name, episodes_to_download, path,
     if len(discarded_episodes) > 0:
         warning('episodes {} not found; downloading only episodes {}'.format(discarded_episodes, episodes_to_download))
     log('opening browser...')
-    chrome = generate_chrome_driver(load_timeout_seconds=short_timeout, player_quality=player_quality)
+    chrome = generate_chrome_driver()
+    driver_timeout_get_url(chrome, url=base_url, timeout=timeouts[0])
+    set_driver_quality(chrome, player_quality)
     log('downloading {} episodes {}'.format(anime_name, episodes_to_download))
     for ep_index in episodes_to_download:
         log('finding episode {} download link...'.format(ep_index))
-        try:
-            download_url = get_download_url_from_ep_watch_url(episode_links[ep_index], chrome,
-                                                              load_timeout_seconds=short_timeout)
-        except:
-            download_url = get_download_url_from_ep_watch_url(episode_links[ep_index], chrome,
-                                                              load_timeout_seconds=long_timeout)
-        finally:
+        download_url = None
+        for timeout in timeouts:
+            try:
+                download_url = get_download_url_from_ep_watch_url(episode_links[ep_index],
+                                                              chrome,
+                                                              load_timeout_seconds=timeout)
+                break
+
+            except:
+                continue
+
+        if download_url is None:
+            print(chrome.page_source)
+            error("couldn't find download url for {} ep {}".format(anime_name, ep_index))
+
+        else:
             if not os.path.exists(path):
                 os.makedirs(path)
             download_file(download_url, "{}/ep{}.mp4".format(path, ep_index))
-            download_url = "no url"
     chrome.quit()

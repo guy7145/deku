@@ -2,7 +2,7 @@ from time import perf_counter
 
 
 class DownloadStatistics:
-    def __init__(self, timestamps_er_measure=15):
+    def __init__(self, timestamps_er_measure=30):
         self.last_time = 0
         self.speed = 0
         self.current_timestamp = 0

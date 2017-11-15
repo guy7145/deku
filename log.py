@@ -7,13 +7,22 @@ NORMAL = '\033[0m'
 WARNING = '\033[33m'
 ERROR = '\033[31m'
 
-# BOLD = '\033[1m'
+BOLD = '\033[1m'
 # UNDERLINE = '\033[4m'
 
 
+def log(txt, *args, **kwargs):
+    print(txt, *args, **kwargs)
+    return
+
+
 def warning(msg, *args, **kwargs):
-    print(WARNING + 'warning: ' + str(msg) + NORMAL, *args, **kwargs)
+    log(WARNING + 'warning: ' + str(msg) + NORMAL, *args, **kwargs)
 
 
 def error(msg, *args, **kwargs):
-    print(ERROR + 'error: ' + str(msg) + NORMAL, *args, **kwargs)
+    log(ERROR + 'error: ' + str(msg) + NORMAL, *args, **kwargs)
+
+
+def bold(msg, *args, **kwargs):
+    log(BOLD + str(msg) + NORMAL, *args, **kwargs)

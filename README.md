@@ -35,20 +35,20 @@ airing time and date of the next episode (if exists)
 
 
 ### Downloading
-#### <i>download(anime_name, episodes, path='./', player_quality='1080p', server_number=0, short_timeout=10, long_timeout=20)</i>
+#### <i>download(anime_name, episodes, path='./', player_quality='1080p', server_number=0, timeouts=(5, 10, 20))</i>
 downloads <i>anime_name</i> to "<i>./path/anime_name</i>"
 (a directory named "<i>anime_name</i>" will be created if doesnt exist, and the episodes will be downloaded there).
 <br><br>
 <i>episodes</i>: list (or other form of iterable) of episode to download.
 <br><br>
-<i>player_quality</i>: either '360p', '480p', '720p' or '1080p'. works on server 0, not tested on other servers. if the requested quality isn't available, there's no guarantee on the quality the episodes will be downloaded in.
+<i>player_quality</i>: either '360', '480', '720' or '1080' (notice: no 'p'). works on server 0, not tested on other servers. if the requested quality isn't available, there's no guarantee on the quality the episodes will be downloaded in.
 <br><br>
 <i>server_number</i>: the server to download the episodes from.
 <br><br>
-timeouts: the time chrome spends loading the page before requesting for the source. if using the short_timeout the requested links weren't found, long_timeout will be tried instead. if the links still can't be found, an error will be raised.
+timeouts: the time chrome spends loading the page before requesting for the source. if while using timeouts[i] the requested links weren't found, timeouts[i+1] will be tried and so on. if the links still can't be found at the end, an error will be raised.
 <br><br>
 
-#### <i>download_by_url(series_url, anime_name, episodes, path='./', player_quality='1080p', server_number=0, short_timeout=10, long_timeout=20)</i>
+#### <i>download_by_url(series_url, anime_name, episodes, path='./', player_quality='1080p', server_number=0, timeouts=(5, 10, 20))</i>
 downloads <i>anime_name</i> to "<i>./path/anime_name</i>", from the specified url: <i>series_url</i>; (a directory named "<i>anime_name</i>" will be created if doesnt exist, and the episodes will be downloaded there).
 <br>
 <strong>** use this function in case the normal download function fails to find the <i>watch url</i> (an indicator is when the '<i>find</i>' function fails)</strong>
