@@ -4,12 +4,12 @@ from time import sleep
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.remote.command import Command
 
+SOUP_PARSER_HTML = 'html.parser'
 from BrowseUtils import driver_timeout_get_url, generate_chrome_driver, fetch_url, get_absolute_url, download_file
 from Site9AnimeStuff import find_series_url_by_name
 from log import warning, error, log, bold
 from bs4 import BeautifulSoup
 
-SOUP_PARSER_HTML = 'html.parser'
 
 
 def find_all_servers_and_eps(series_page_html):
@@ -194,6 +194,11 @@ class G3(G3F4AndWhatever):
         return 'Server G3'
 
 
+class G4(G3F4AndWhatever):
+    def get_server_name(self):
+        return 'Server G4'
+
+
 class F4(G3F4AndWhatever):
     def get_server_name(self):
         return 'Server F4'
@@ -208,8 +213,8 @@ if __name__ == '__main__':
     s = RapidVideo()
     try:
         s.download_episodes(find_series_url_by_name('shokugeki no souma'),
-                            requested_episodes=[2, 1, 3, 4, 5, 6],
-                            download_path='.\\downloaded',
+                            requested_episodes=[3, 4, 5, 6],
+                            download_path='.\\downloaded\\shokugeki no souma',
                             quality=None)
     finally:
         s.close()

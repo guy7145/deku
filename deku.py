@@ -1,4 +1,4 @@
-from Servers import G3
+from Servers import G3, RapidVideo
 from Site9AnimeStuff import find_series_url_by_name
 from log import warning, error, log
 
@@ -14,7 +14,7 @@ def download_episodes_by_url(series_url, anime_name, episodes_to_download, path,
     print(path)
     path = path + '\\' + anime_name
     if server is None:
-        server = G3()
+        server = RapidVideo()
     log('downloading {} episodes {} from server {} to path \'{}\''.format(anime_name,
                                                                           episodes_to_download,
                                                                           server,

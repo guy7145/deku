@@ -1,4 +1,7 @@
+from bs4 import BeautifulSoup
+
 from BrowseUtils import fetch_url
+from Servers import SOUP_PARSER_HTML
 from log import log
 
 base_url = "http://9anime.to"
@@ -8,7 +11,9 @@ base_watch_url = "https://9anime.to/watch"
 def search_series_urls_by_name(name):
     log('searching "{}"'.format(name))
     page = fetch_url(base_url + "/search?keyword=" + name.replace(' ', '+'))
-    results = {line for line in page.split('\"') if base_watch_url in line}
+    soup = BeautifulSoup(page, SOUP_PARSER_HTML)
+    posters = soup.find_all('a', {'class': 'poster'})
+    results = [poster['href'] for poster in posters]
     return list(results)
 
 
