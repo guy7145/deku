@@ -1,32 +1,34 @@
 import os
 from time import sleep
-
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.remote.command import Command
-
-SOUP_PARSER_HTML = 'html.parser'
-from BrowseUtils import driver_timeout_get_url, generate_chrome_driver, fetch_url, get_absolute_url, download_file
+from BrowseUtils import driver_timeout_get_url, generate_chrome_driver, fetch_url, get_absolute_url, download_file, \
+    SOUP_PARSER_HTML
 from Site9AnimeStuff import find_series_url_by_name
 from log import warning, error, log, bold
 from bs4 import BeautifulSoup
 
 
-
-def find_all_servers_and_eps(series_page_html):
+def _find_all_servers_and_eps(series_page_html):
     hosts = dict()
     soup = BeautifulSoup(series_page_html, SOUP_PARSER_HTML)
-    server_rows = soup.find_all(name='div', attrs={'class': 'server row'})
-    for server_row in server_rows:
-        name = list(server_row.find('label').strings)[-1].strip(' \n')
-        ep_links = server_row.find_all('a')
+
+    widget = soup.find(attrs={'class': 'widget servers'})
+    titles = widget.find(attrs={'class': 'widget-title'}).find(attrs={'class': 'tabs'}).find_all(attrs={'class': 'tab'})
+    servers = widget.find(attrs={'class': 'widget-body'}).find_all(attrs={'class': 'server'})
+
+    for title, server in zip(titles, servers):
+        name = title.text
+        ep_links = server.find_all('a')
         eps = list()
         for ep_link in ep_links:
             ep = Episode(ep_number=int(ep_link['data-base']),
-                                date_added=ep_link['data-title'],
-                                ep_id=ep_link['data-id'],
-                                rel_url=ep_link['href'])
+                         date_added=ep_link['data-title'],
+                         ep_id=ep_link['data-id'],
+                         rel_url=ep_link['href'])
             eps.append(ep)
         hosts[name] = eps
+
     return hosts
 
 
@@ -47,6 +49,18 @@ class Episode:
                                                                 date=self.date_added)
 
 
+def getRidOfCoverDiv(driver):
+    js = "getEventListeners(document.getElementsByClassName('cover')[0])['click'][0].listener({type: 'click'})"
+    driver.find_elements_by_class_name('cover')[0].click()
+    driver.switch_to_window(driver.window_handles[1])
+    driver.close()
+    driver.switch_to_window(driver.window_handles[0])
+    sleep(3)
+    # driver.execute_script(js, [])
+    # print(driver.execute("getEventListeners", "document.getElementsByClassName('cover')[0]"))
+    return
+
+
 class ServerSpecificCrawler:
     def __init__(self):
         self.driver = generate_chrome_driver()
@@ -65,7 +79,7 @@ class ServerSpecificCrawler:
         return driver_timeout_get_url(self.driver, url)
 
     def _find_episode_watch_links(self, series_page_html):
-        hosts = find_all_servers_and_eps(series_page_html)
+        hosts = _find_all_servers_and_eps(series_page_html)
         bold('Found {} Servers:'.format(len(hosts.keys())))
         log('\n'.join(
             ['{}:\t{}'.format(server_name, [ep.ep_number for ep in hosts[server_name]]) for server_name in hosts]
@@ -104,6 +118,9 @@ class ServerSpecificCrawler:
         self.set_quality(quality)
         for ep in episodes_to_download:
             self._navigate(get_absolute_url(series_page_url, relative_url=ep.ep_id))
+
+            getRidOfCoverDiv(self.driver)
+
             download_url = self._find_download_url(self.driver.page_source)
             log('found download url for episode {}!'.format(ep.ep_number))
             if not os.path.exists(download_path):
@@ -120,7 +137,7 @@ class RapidVideo(ServerSpecificCrawler):
 
     def _find_download_url(self, ep_page_html):
         soup = BeautifulSoup(ep_page_html, SOUP_PARSER_HTML)
-        link = soup.find('iframe', attrs={'allowfullscreen': 'yes'})['src']
+        link = soup.find(attrs={'id': 'player'}).find('iframe')['src']
         # link = link[:link.index('?')]   # no 'autostart=True' parameter
         self._navigate(link)
         sleep(3)

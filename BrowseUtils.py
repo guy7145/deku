@@ -15,6 +15,7 @@ friendly_user_agent = \
 
 KILO = 2**10
 MEGA = 2**20
+SOUP_PARSER_HTML = 'html.parser'
 
 
 def make_safe_url(url):
@@ -40,8 +41,16 @@ def get_absolute_url(domain, relative_url):
 
 def generate_chrome_driver():
     options = webdriver.ChromeOptions()
+
     options.add_argument("--mute-audio")
-    driver = webdriver.Chrome(chrome_options=options)
+    options.add_argument("--incognito")
+    options.add_argument("--enable-devtools-experiments")
+    # options.add_argument("--disable-extensions")
+    # options.add_argument("--headless")
+
+    capabilities = webdriver.DesiredCapabilities.CHROME
+    # capabilities['javascriptEnabled'] = True
+    driver = webdriver.Chrome(chrome_options=options, desired_capabilities=capabilities)
     return driver
 
 
