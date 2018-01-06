@@ -1,11 +1,10 @@
 import os
 from time import sleep
-from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.remote.command import Command
-from BrowseUtils import driver_timeout_get_url, generate_chrome_driver, fetch_url, get_absolute_url, download_file, \
+from src.BrowseUtils import driver_timeout_get_url, generate_chrome_driver, fetch_url, get_absolute_url, download_file, \
     SOUP_PARSER_HTML
-from Site9AnimeStuff import find_series_url_by_name
-from log import warning, error, log, bold
+from src.Site9AnimeStuff import find_series_url_by_name
+from src.log import warning, error, log, bold
 from bs4 import BeautifulSoup
 
 

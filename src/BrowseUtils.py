@@ -1,14 +1,13 @@
 import urllib
 from math import inf
-from urllib.request import urlopen, Request, urlretrieve
+from urllib.request import urlopen, Request
 
 import requests
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.remote.command import Command
 
-from DownloadStatistics import DownloadStatistics
-from log import log, warning, error
+from src.DownloadStatistics import DownloadStatistics
+from src.log import log
 
 friendly_user_agent = \
     'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'

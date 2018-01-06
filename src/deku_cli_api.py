@@ -1,7 +1,4 @@
-from log import bold
-import Site9AnimeStuff
-import deku
-from Servers import *
+from src import Site9AnimeStuff, deku
 
 search = Site9AnimeStuff.search_series_urls_by_name
 find_by_substring = Site9AnimeStuff.find_series_urls_by_name_substring

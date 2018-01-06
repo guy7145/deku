@@ -1,12 +1,10 @@
-import math
 from bs4 import BeautifulSoup
 
-import BrowseUtils
-import Site9AnimeStuff
-from BrowseUtils import fetch_url, SOUP_PARSER_HTML
-from Servers import G3, RapidVideo, _find_all_servers_and_eps
-from Site9AnimeStuff import find_series_url_by_name
-from log import warning, error, log, bold
+from src import BrowseUtils, Site9AnimeStuff
+from src.BrowseUtils import fetch_url, SOUP_PARSER_HTML
+from src.Servers import RapidVideo, _find_all_servers_and_eps
+from src.Site9AnimeStuff import find_series_url_by_name
+from src.log import error, log, bold
 
 
 def download_episodes(anime_name, episodes_to_download, path, player_quality=None, server=RapidVideo):

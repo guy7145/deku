@@ -1,7 +1,6 @@
 from bs4 import BeautifulSoup
-
-from BrowseUtils import fetch_url, SOUP_PARSER_HTML
-from log import log
+from src.BrowseUtils import fetch_url, SOUP_PARSER_HTML
+from src.log import log
 
 base_url = "http://9anime.to"
 base_watch_url = "https://9anime.to/watch"
