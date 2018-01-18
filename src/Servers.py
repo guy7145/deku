@@ -105,20 +105,25 @@ class ServerSpecificCrawler:
 
         # inform the user in case some episodes are missing...
         available_episodes_numbers = set([ep.ep_number for ep in available_episodes])
-        requested_episodes = set(requested_episodes)
-        requested_but_not_available = requested_episodes.difference(available_episodes_numbers)
-        requested_and_available = requested_episodes.intersection(available_episodes_numbers)
-        if len(requested_but_not_available) > 0:
-            warning('episodes {} not available; downloading episodes {}'.format(requested_but_not_available,
-                                                                                requested_and_available))
+        if requested_episodes is None:
+            requested_episodes = available_episodes_numbers
+        else:
+            requested_episodes = set(requested_episodes)
+            requested_but_not_available = requested_episodes.difference(available_episodes_numbers)
+            requested_and_available = requested_episodes.intersection(available_episodes_numbers)
+            if len(requested_but_not_available) > 0:
+                warning('episodes {} not available; downloading episodes {}'.format(requested_but_not_available,
+                                                                                    requested_and_available))
         # end of user stuff
 
         episodes_to_download = [ep for ep in available_episodes if ep.ep_number in requested_episodes]
         self.set_quality(quality)
+        divRidden = False
         for ep in episodes_to_download:
             self._navigate(get_absolute_url(series_page_url, relative_url=ep.ep_id))
-
-            getRidOfCoverDiv(self.driver)
+            if not divRidden:
+                getRidOfCoverDiv(self.driver)
+                divRidden = True
 
             download_url = self._find_download_url(self.driver.page_source)
             log('found download url for episode {}!'.format(ep.ep_number))

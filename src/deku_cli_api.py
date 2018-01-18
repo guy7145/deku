@@ -30,13 +30,13 @@ find = find_exact
 #     return
 
 
-def download(anime_name, episodes, path='.', *args, **kwargs):
-    return deku.download_episodes(anime_name=anime_name, episodes_to_download=episodes, path=path, *args, **kwargs)
+def download(anime_name, episodes=None, *args, **kwargs):
+    return deku.download_episodes(anime_name=anime_name, episodes_to_download=episodes, *args, **kwargs)
 
 
-def download_by_url(series_url, anime_name, episodes, path='.', *args, **kwargs):
+def download_by_url(series_url, anime_name, episodes, *args, **kwargs):
     return deku.download_episodes_by_url(series_url=series_url, anime_name=anime_name, episodes_to_download=episodes,
-                                         path=path, *args, **kwargs)
+                                         *args, **kwargs)
 
 
 info = deku.info

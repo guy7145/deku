@@ -9,6 +9,7 @@ from selenium.common.exceptions import TimeoutException
 from src.DownloadStatistics import DownloadStatistics
 from src.log import log
 
+
 friendly_user_agent = \
     'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'
 
@@ -40,16 +41,19 @@ def get_absolute_url(domain, relative_url):
 
 def generate_chrome_driver():
     options = webdriver.ChromeOptions()
+    # no junk output in console
+    options.add_argument('log-level=3')
 
     options.add_argument("--mute-audio")
     options.add_argument("--incognito")
-    options.add_argument("--enable-devtools-experiments")
+    # options.add_argument("--enable-devtools-experiments")
     # options.add_argument("--disable-extensions")
     options.add_argument("--headless")
 
     capabilities = webdriver.DesiredCapabilities.CHROME
     # capabilities['javascriptEnabled'] = True
     driver = webdriver.Chrome(chrome_options=options, desired_capabilities=capabilities)
+
     return driver
 
 
