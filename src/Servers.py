@@ -94,16 +94,26 @@ class ServerSpecificCrawler:
     def _find_download_url(self, ep_page_html):
         raise NotImplementedError
 
+    def _travel_episodes(self, series_url, eps):
+        for ep in eps:
+            self._navigate(get_absolute_url(series_url, relative_url=ep.ep_id))
+            getRidOfCoverDiv(self.driver)
+            yield self._find_download_url(self.driver.page_source)
+
     def download_episodes(self, series_page_url, requested_episodes, quality, download_path):
+        # region quality
         if quality is None:
             quality = self.highest_quality()
             warning('no specific quality was requested; '
                     'using highest quality ({}) available in this server ({})'.format(quality, self.get_server_name()))
 
+        self.set_quality(quality)
+        # endregion
+
         series_page_html = fetch_url(series_page_url)
         available_episodes = self._find_episode_watch_links(series_page_html)
 
-        # inform the user in case some episodes are missing...
+        # region inform the user in case some episodes are missing...
         available_episodes_numbers = set([ep.ep_number for ep in available_episodes])
         if requested_episodes is None:
             requested_episodes = available_episodes_numbers
@@ -114,22 +124,16 @@ class ServerSpecificCrawler:
             if len(requested_but_not_available) > 0:
                 warning('episodes {} not available; downloading episodes {}'.format(requested_but_not_available,
                                                                                     requested_and_available))
-        # end of user stuff
 
         episodes_to_download = [ep for ep in available_episodes if ep.ep_number in requested_episodes]
-        self.set_quality(quality)
-        divRidden = False
-        for ep in episodes_to_download:
-            self._navigate(get_absolute_url(series_page_url, relative_url=ep.ep_id))
-            if not divRidden:
-                getRidOfCoverDiv(self.driver)
-                divRidden = True
+        # endregion
 
-            download_url = self._find_download_url(self.driver.page_source)
+        for download_url, ep in zip(self._travel_episodes(series_page_url, episodes_to_download), episodes_to_download):
             log('found download url for episode {}!'.format(ep.ep_number))
             if not os.path.exists(download_path):
                 os.makedirs(download_path)
             download_file(download_url, "{}/ep{}.mp4".format(download_path, ep.ep_number))
+
         return
 
     def __repr__(self):

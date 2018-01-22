@@ -4,7 +4,7 @@ from src.deku_cli_api import *
 
 def main():
     download_path = 'D:\_Guy\d9anime\downloaded'
-    download('overlord')
+    download('kyoukai no kanata', [12])
     return
 
 
