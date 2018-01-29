@@ -34,12 +34,11 @@ def download(anime_name, episodes=None, *args, **kwargs):
     return deku.download_episodes(anime_name=anime_name, episodes_to_download=episodes, *args, **kwargs)
 
 
-def download_by_url(series_url, anime_name, episodes, *args, **kwargs):
-    return deku.download_episodes_by_url(series_url=series_url, anime_name=anime_name, episodes_to_download=episodes,
+def download_by_url(anime_name, url, episodes, *args, **kwargs):
+    return deku.download_episodes_by_url(anime_name=anime_name, url=url, episodes_to_download=episodes,
                                          *args, **kwargs)
 
 
 info = deku.info
-
 episodes = deku.episodes
 eps = episodes

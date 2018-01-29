@@ -10,10 +10,10 @@ from src.log import error, log, bold
 def download_episodes(anime_name, *args, **kwargs):
     log('fetching {}\'s series url...'.format(anime_name))
     series_url = find_series_url_by_name(anime_name)
-    return download_episodes_by_url(series_url=series_url, anime_name=anime_name, *args, **kwargs)
+    return download_episodes_by_url(anime_name=anime_name, url=series_url, *args, **kwargs)
 
 
-def download_episodes_by_url(series_url, anime_name, episodes_to_download=None, path='.', player_quality=None, server=RapidVideo):
+def download_episodes_by_url(anime_name, url, episodes_to_download=None, path='.', player_quality=None, server=RapidVideo):
     path = path + '\\' + anime_name
     server = server()
     log('downloading {} episodes {} from server {} to path \'{}\''.format(anime_name,
@@ -21,7 +21,7 @@ def download_episodes_by_url(series_url, anime_name, episodes_to_download=None, 
                                                                           server,
                                                                           path))
     try:
-        server.download_episodes(series_page_url=series_url,
+        server.download_episodes(series_page_url=url,
                                  requested_episodes=episodes_to_download,
                                  quality=player_quality,
                                  download_path=path)
