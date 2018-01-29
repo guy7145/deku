@@ -89,39 +89,20 @@ ep 2    (added at Oct 11, 2015 - 11:05) m4p4n7<br>
 ep 3    (added at Oct 18, 2015 - 11:05) y94931<br>
 ep 4    (added at Oct 25, 2015 - 11:05) x6364w<br>
 ep 5    (added at Nov 01, 2015 - 11:05) j6m688<br>
-ep 6    (added at Nov 08, 2015 - 11:05) n2q20j<br>
-ep 7    (added at Nov 15, 2015 - 11:05) r9x90p<br>
-ep 8    (added at Nov 22, 2015 - 11:05) n2q2mj<br>
-ep 9    (added at Nov 29, 2015 - 11:05) 97x7rq<br>
-ep 10   (added at Dec 06, 2015 - 11:05) y94951<br>
-ep 11   (added at Dec 13, 2015 - 11:05) r9x9qp<br>
-ep 12   (added at Dec 20, 2015 - 11:05) 6yry4z<br>
+...<br>
 MyCloud<br>
 ep 1    (added at Oct 04, 2015 - 11:05) n2q2oj<br>
 ep 2    (added at Oct 11, 2015 - 11:05) j6m6k8<br>
 ep 3    (added at Oct 18, 2015 - 11:05) v212x6<br>
 ep 4    (added at Oct 25, 2015 - 11:05) r9x9vp<br>
 ep 5    (added at Nov 01, 2015 - 11:05) 7yvy9y<br>
-ep 6    (added at Nov 08, 2015 - 11:05) k4n406<br>
-ep 7    (added at Nov 15, 2015 - 11:05) o8r80y<br>
-ep 8    (added at Nov 22, 2015 - 11:05) k4n4j6<br>
-ep 9    (added at Nov 29, 2015 - 11:05) 6yryoz<br>
-ep 10   (added at Dec 06, 2015 - 11:05) v21246<br>
-ep 11   (added at Dec 13, 2015 - 11:05) o8r8ny<br>
-ep 12   (added at Dec 20, 2015 - 11:05) 3yoy49<br>
+...<br>
 OpenLoad<br>
 ep 1    (added at Oct 04, 2015 - 11:05) p2v2qx<br>
 ep 2    (added at Oct 11, 2015 - 11:05) l4o4mm<br>
 ep 3    (added at Oct 18, 2015 - 11:05) x6360w<br>
 ep 4    (added at Oct 25, 2015 - 11:05) wy2y4l<br>
-ep 5    (added at Nov 01, 2015 - 11:05) 97x74q<br>
-ep 6    (added at Nov 08, 2015 - 11:05) m4p487<br>
-ep 7    (added at Nov 15, 2015 - 11:05) q2w23w<br>
-ep 8    (added at Nov 22, 2015 - 11:05) m4p4l7<br>
-ep 9    (added at Nov 29, 2015 - 11:05) 87w7q3<br>
-ep 10   (added at Dec 06, 2015 - 11:05) x6365w<br>
-ep 11   (added at Dec 13, 2015 - 11:05) q2w2pw<br>
-ep 12   (added at Dec 20, 2015 - 11:05) 5yqy7v<br>
+...<br>
 <br>
 
 ##### <strike><i>estimate(anime_name)</i>
