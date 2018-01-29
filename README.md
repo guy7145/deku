@@ -62,7 +62,7 @@ looks for all the animes that contain all the words from <i>anime_name</i> in th
 <br><br>
 example: 
 <br>
-find_by_keywords('one road punch')
+find_by_keywords('one punch man')
 <br><br>
 results:
 <br>
@@ -79,7 +79,7 @@ finds (using <i>find</i>) <i>anime_name</i>'s page and prints how many episodes 
 <br><br>
 example: 
 <br>
-info('one road punch')
+info('one punch man')
 <br><br>
 results:
 <br>
