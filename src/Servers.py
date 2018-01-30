@@ -132,7 +132,7 @@ class ServerSpecificCrawler:
             log('found download url for episode {}!'.format(ep.ep_number))
             if not os.path.exists(download_path):
                 os.makedirs(download_path)
-            download_file(download_url, "{}/ep{}.mp4".format(download_path, ep.ep_number))
+            download_file(download_url, os.path.join(download_path, "ep{}.mp4".format(ep.ep_number)))
 
         return
 
@@ -232,14 +232,3 @@ class F4(G3F4AndWhatever):
 class F2(G3F4AndWhatever):
     def get_server_name(self):
         return 'Server F2'
-
-
-if __name__ == '__main__':
-    s = RapidVideo()
-    try:
-        s.download_episodes(find_series_url_by_name('shokugeki no souma'),
-                            requested_episodes=[3, 4, 5, 6],
-                            download_path='.\\downloaded\\shokugeki no souma',
-                            quality=None)
-    finally:
-        s.close()
