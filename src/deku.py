@@ -1,3 +1,4 @@
+import os
 from bs4 import BeautifulSoup
 
 from src import BrowseUtils, Site9AnimeStuff
@@ -14,7 +15,7 @@ def download_episodes(anime_name, *args, **kwargs):
 
 
 def download_episodes_by_url(anime_name, url, path, episodes_to_download=None, player_quality=None, server=RapidVideo):
-    path = path + '\\' + anime_name
+    path = os.path.join(path, anime_name)
     server = server()
     log('downloading {} episodes {} from server {} to path \'{}\''.format(anime_name,
                                                                           episodes_to_download,
