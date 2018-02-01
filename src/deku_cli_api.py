@@ -1,3 +1,4 @@
+import ctypes
 import os
 
 from src import Site9AnimeStuff, deku
@@ -48,3 +49,5 @@ def download_by_url(anime_name, url, episodes=None, path=None, *args, **kwargs):
 info = deku.info
 episodes = deku.episodes
 eps = episodes
+
+ctypes.windll.kernel32.SetConsoleTitleW("deku")
