@@ -65,7 +65,3 @@ def find_series_url_by_name(name):
     result = results[0]
     log('found watching page of {}: {}'.format(name, result))
     return result
-
-
-print(sanitize_name('    Nanatsu no Taizai: Imashime no Fukkatsu  : '))
-print(sanitize_name('Yuru Camp\\xe2\\x96\\xb3'))
