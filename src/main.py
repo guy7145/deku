@@ -6,7 +6,7 @@ def main():
     # download_path = 'D:\_Guy\d9anime\downloaded'
     # download('kyoukai no kanata', [12])
     print(find('steins gate'))
-    # print(find('nanatsu no taizai imashime no fukkatsu'))
+    print(find('nanatsu no taizai imashime no fukkatsu'))
     print(find('yuru camp'))
     return
 

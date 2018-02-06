@@ -58,7 +58,7 @@ def find_series_url_by_name(name):
 
     if len(results) == 0:
         log("watching page of {} couldn't be found. please check for typos or switch to names in opposite language (english/japanese)".format(name))
-        raise Exception
+        raise Exception()
     elif len(results) > 1:
         log("more than 1 result were found for {}, choosing the first one;".format(name))
 

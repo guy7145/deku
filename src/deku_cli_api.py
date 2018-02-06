@@ -3,11 +3,25 @@ import os
 
 from src import Site9AnimeStuff, deku
 
-search = Site9AnimeStuff.search_series_urls_by_name
-find_by_substring = Site9AnimeStuff.find_series_urls_by_name_substring
-find_by_keywords = Site9AnimeStuff.find_series_urls_by_keywords
-find_exact = Site9AnimeStuff.find_series_url_by_name
+
+def no_exception(f):
+    def no_ex(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except Exception as e:
+            print('--> An exception has occurred during the last operation')
+    return no_ex
+
+
+search = no_exception(Site9AnimeStuff.search_series_urls_by_name)
+find_by_substring = no_exception(Site9AnimeStuff.find_series_urls_by_name_substring)
+find_by_keywords = no_exception(Site9AnimeStuff.find_series_urls_by_keywords)
+find_exact = no_exception(Site9AnimeStuff.find_series_url_by_name)
 find = find_exact
+
+info = no_exception(deku.info)
+episodes = no_exception(deku.episodes)
+eps = episodes
 
 
 # def estimate(anime_name, load_timeout_seconds=5):
@@ -33,21 +47,19 @@ find = find_exact
 #     return
 
 
+@no_exception
 def download(anime_name, episodes=None, path=None, *args, **kwargs):
     if path is None:
         path = os.getcwd()
     return deku.download_episodes(anime_name=anime_name, episodes_to_download=episodes, path=path, *args, **kwargs)
 
 
+@no_exception
 def download_by_url(anime_name, url, episodes=None, path=None, *args, **kwargs):
     if path is None:
         path = os.getcwd()
     return deku.download_episodes_by_url(anime_name=anime_name, url=url, path=path, episodes_to_download=episodes,
                                          *args, **kwargs)
 
-
-info = deku.info
-episodes = deku.episodes
-eps = episodes
 
 ctypes.windll.kernel32.SetConsoleTitleW("deku")
