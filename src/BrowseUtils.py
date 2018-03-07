@@ -135,22 +135,18 @@ def download_file(url, file_path, headers=None):
     return
 
 
-def download_file_from_multiple_sources(urls, dir_path, headers=None):
-    log('downloading {}'.format(dir_path))
-    print(headers)
-    print(dir_path)
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
+def download_file_from_multiple_sources(urls, path, headers=None):
+    log('downloading {} from multiple urls'.format(path))
+    # if not os.path.exists(path):
+    #     os.makedirs(path)
 
     headers = make_headers_with_user_agent(headers)
-    for i, url in enumerate(urls):
-        file_name = url[url.rfind('/') + 1:]
-        file_path = os.path.join(dir_path, file_name)
-        with open(file_path, 'wb') as f:
+    with open(path, 'wb') as f:
+        for i, url in enumerate(urls):
+            # file_name = url[url.rfind('/') + 1:]
+            # file_path = os.path.join(path, file_name)
             f.write(fetch_url(url, headers=headers, return_bytes=True))
-
-        # download_file(url, file_path, headers)
-        print('\r{}/{}...'.format(i, len(urls)), end='')
+            print('\r{}/{}...'.format(i, len(urls)), end='')
     print()
-    log('finished downloading {}'.format(dir_path))
+    log('finished downloading {}'.format(path))
     return

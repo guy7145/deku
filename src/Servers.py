@@ -141,7 +141,7 @@ class ServerSpecificCrawler:
             if type(download_url) is str:
                 download_file(download_url, os.path.join(download_path, "ep{}.mp4".format(ep.ep_number)), self.get_headers())
             else:
-                download_file_from_multiple_sources(download_url, os.path.join(download_path, "ep{}".format(ep.ep_number)), self.get_headers())
+                download_file_from_multiple_sources(download_url, os.path.join(download_path, "ep{}.ts".format(ep.ep_number)), self.get_headers())
 
         return
 
@@ -305,4 +305,5 @@ class MyCloud(ServerSpecificCrawler):
 
         ep_dir_url = ep_dir + '/hls/{}/'.format(quality.split('x')[1])
         ts_urls = [ep_dir_url + url for url in ts_urls]
-        return [playlist_url] + ts_urls
+        # return [playlist_url] + ts_urls
+        return ts_urls
