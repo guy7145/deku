@@ -9,7 +9,7 @@ def no_exception(f):
         try:
             return f(*args, **kwargs)
         except Exception as e:
-            print('--> An exception has occurred during the last operation')
+            print('--> An exception has occurred during the last operation: {}'.format(e))
     return no_ex
 
 

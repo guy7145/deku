@@ -1,7 +1,9 @@
+import copy
 import urllib
 from math import inf
 from urllib.request import urlopen, Request
 
+import os
 import requests
 from selenium import webdriver
 from selenium.common.exceptions import TimeoutException
@@ -16,23 +18,30 @@ friendly_user_agent = \
 KILO = 2**10
 MEGA = 2**20
 SOUP_PARSER_HTML = 'html.parser'
+CONTENT_LENGTH = 'content-length'
 
 
 def make_safe_url(url):
     return urllib.parse.quote(url, safe='$-_.+!*\'(),;/?:@=&%')
 
 
-def create_request(url):
-    user_agent = friendly_user_agent
-    # log('using user agent {}'.format(user_agent))
-    return Request(url, headers={'User-Agent': user_agent})
-
-
-def fetch_url(url):
+def fetch_url(url, headers=None, return_bytes=False):
     # log('fetching {}'.format(url))
-    req = create_request(url)
+    headers = make_headers_with_user_agent(headers)
+    req = Request(url, headers=headers)
     with urlopen(req) as page:
-        return str(page.read())
+        response = page.read()
+    if return_bytes:
+        return response
+    else:
+        return str(response)
+
+
+def make_headers_with_user_agent(headers):
+    if headers is None:
+        headers = dict()
+    headers['User-Agent'] = friendly_user_agent
+    return headers
 
 
 def get_absolute_url(domain, relative_url):
@@ -47,13 +56,12 @@ def generate_chrome_driver():
     options.add_argument("--mute-audio")
     options.add_argument("--incognito")
     # options.add_argument("--enable-devtools-experiments")
-    # options.add_argument("--disable-extensions")
+    options.add_argument("--disable-extensions")
     options.add_argument("--headless")
 
     capabilities = webdriver.DesiredCapabilities.CHROME
     # capabilities['javascriptEnabled'] = True
     driver = webdriver.Chrome(chrome_options=options, desired_capabilities=capabilities)
-
     return driver
 
 
@@ -73,43 +81,76 @@ def __draw_progressbar(done, total, report_string_format, progress_bar_length=30
     return
 
 
-def download_file(url, file_path):
-    log('downloading: {} -> {}'.format(url, file_path))
-    url = make_safe_url(url)
-    download_statistics = DownloadStatistics()
+def my_reporthook(count, block_size, total, download_statistics):
+    download_statistics.report_block_downloaded(block_size)
 
-    def my_reporthook(count, block_size, total):
-        download_statistics.report_block_downloaded(block_size)
+    done_megabytes = count * block_size / MEGA
+    speed_megabytes = download_statistics.get_speed() / MEGA
+    info_report_string = '\t{speed:.2f}MBps'
 
+    if total is not None:
         size_megabytes = total / MEGA
-        done_megabytes = count * block_size / MEGA
-        speed_megabytes = download_statistics.get_speed() / MEGA
+        estimated = ((size_megabytes - done_megabytes)/speed_megabytes if speed_megabytes != 0 else inf) / 60
+        info_report_string += '\t{done:.2f}/{total_size:.2f} (MB)\tEst: {estimated:.2f} minutes'
+    else:
+        size_megabytes = '?'
+        estimated = '?'
+        info_report_string += '\t{done:.2f}/{total_size} (MB)\tEst: {estimated} minutes'
 
-        estimated = (size_megabytes - done_megabytes)/speed_megabytes if speed_megabytes != 0 else inf
+    info_report_string = info_report_string.format(speed=speed_megabytes,
+                                                   done=done_megabytes,
+                                                   total_size=size_megabytes,
+                                                   estimated=estimated)
 
-        info_report_string = '\t{speed:.2f}MBps' \
-                             '\t{done:.2f}/{total_size:.2f} (MB)' \
-                             '\tEst: {estimated:.2f} minutes'
-        info_report_string = info_report_string.format(speed=speed_megabytes,
-                                                       done=done_megabytes,
-                                                       total_size=size_megabytes,
-                                                       estimated=estimated / 60)
+    if total is not None:
         __draw_progressbar(count * block_size,
                            total,
                            '[{bar}]{percentage:.2%}' + info_report_string,
                            progress_bar_length=50)
-        return
+    else:
+        print('\r' + info_report_string, end='')
+    return
 
-    headers = {'User-Agent': friendly_user_agent}
+
+def download_file(url, file_path, headers=None):
+    log('downloading: {} -> {}'.format(url, file_path))
+    url = make_safe_url(url)
+    headers = make_headers_with_user_agent(headers)
+
+    download_statistics = DownloadStatistics()
     response = requests.get(url, stream=True, headers=headers)
     chunk_size = 4096
-    total_size = int(response.headers['content-length'])
+    if CONTENT_LENGTH in response.headers.keys():
+        total_size = int(response.headers[CONTENT_LENGTH])
+    else:
+        total_size = None
     with open(file_path, 'wb') as outfile:
         for i, data in enumerate(response.iter_content(chunk_size=chunk_size)):
             outfile.write(data)
-            my_reporthook(i, chunk_size, total_size)
+            my_reporthook(i, chunk_size, total_size, download_statistics)
 
     # urlretrieve(url=url, filename=file_path, reporthook=my_reporthook, data=headers)
     print()
     log('finished downloading {}'.format(file_path))
+    return
+
+
+def download_file_from_multiple_sources(urls, dir_path, headers=None):
+    log('downloading {}'.format(dir_path))
+    print(headers)
+    print(dir_path)
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+
+    headers = make_headers_with_user_agent(headers)
+    for i, url in enumerate(urls):
+        file_name = url[url.rfind('/') + 1:]
+        file_path = os.path.join(dir_path, file_name)
+        with open(file_path, 'wb') as f:
+            f.write(fetch_url(url, headers=headers, return_bytes=True))
+
+        # download_file(url, file_path, headers)
+        print('\r{}/{}...'.format(i, len(urls)), end='')
+    print()
+    log('finished downloading {}'.format(dir_path))
     return

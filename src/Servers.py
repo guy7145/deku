@@ -1,8 +1,11 @@
+import json
 import os
 from time import sleep
+
+import re
 from selenium.webdriver.remote.command import Command
 from src.BrowseUtils import driver_timeout_get_url, generate_chrome_driver, fetch_url, get_absolute_url, download_file, \
-    SOUP_PARSER_HTML
+    SOUP_PARSER_HTML, download_file_from_multiple_sources
 from src.Site9AnimeStuff import find_series_url_by_name
 from src.log import warning, error, log, bold
 from bs4 import BeautifulSoup
@@ -69,6 +72,9 @@ class ServerSpecificCrawler:
     def get_server_name(self):
         raise NotImplementedError
 
+    def get_headers(self):
+        return None
+
     def close(self):
         self.driver.close()
         log('Crawler for {} is down.'.format(self.get_server_name()))
@@ -132,7 +138,10 @@ class ServerSpecificCrawler:
             log('found download url for episode {}!'.format(ep.ep_number))
             if not os.path.exists(download_path):
                 os.makedirs(download_path)
-            download_file(download_url, os.path.join(download_path, "ep{}.mp4".format(ep.ep_number)))
+            if type(download_url) is str:
+                download_file(download_url, os.path.join(download_path, "ep{}.mp4".format(ep.ep_number)), self.get_headers())
+            else:
+                download_file_from_multiple_sources(download_url, os.path.join(download_path, "ep{}".format(ep.ep_number)), self.get_headers())
 
         return
 
@@ -232,3 +241,68 @@ class F4(G3F4AndWhatever):
 class F2(G3F4AndWhatever):
     def get_server_name(self):
         return 'Server F2'
+
+
+class MyCloud(ServerSpecificCrawler):
+    DOMAIN = 'https://mcloud.to'
+    spoofed_headers = {'Host': 'mcloud.to',
+                       'Origin': DOMAIN,
+                       'Referer': DOMAIN,
+                       'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+                       'accept-encoding': 'gzip, deflate, br',
+                       'accept-language': 'en-US,en;q=0.9',
+                       'cache-control': 'max-age=0',
+                       'upgrade-insecure-requests': '1',
+                       'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}
+
+    def get_headers(self):
+        return MyCloud.spoofed_headers
+
+    def get_server_name(self):
+        return 'MyCloud'
+
+    def highest_quality(self):
+        pass
+
+    def set_quality(self, requested_quality):
+        pass
+
+    def __get_playlists_list(self):
+        iframe = self.driver.find_elements_by_tag_name('iframe')[0]
+        self.driver.switch_to_frame(iframe)
+        lst = re.search('\[{"file":"(.+)"}\]', self.driver.page_source).group(1)
+        return lst
+
+    httpGetJavaScript = """return (function(theUrl)
+  {
+    var xmlHttp = null;
+    xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false );
+    xmlHttp.send( null );
+    return xmlHttp.responseText;
+    
+  })(arguments[0])"""
+
+    def _find_download_url(self, ep_page_html):
+        list_of_qualities = self.__get_playlists_list()
+        ep_dir = list_of_qualities[:list_of_qualities.rfind('/')]
+        print(ep_dir)
+        print(list_of_qualities)
+        self._navigate(self.DOMAIN)
+
+        m3us_text = self.driver.execute_script(self.httpGetJavaScript, [list_of_qualities])
+        playlists = re.findall('#EXT-X-STREAM-INF:PROGRAM-ID=., BANDWIDTH=.+, RESOLUTION=(.+)\n(.+)', m3us_text)
+        quality, playlist_url = max(playlists, key=lambda opt: int(opt[0].split('x')[1]))  # 1280x720 -> 720; 640x360 -> 360; etc.
+        playlist_url = ep_dir + '/' + playlist_url
+
+        print('found playlist with quality {} in {}'.format(quality, playlist_url))
+
+        # ts_urls = self.driver.execute_script(self.httpGetJavaScript, [ep_dir + '/' + playlist_url]).split('\n')
+        ts_urls = fetch_url(playlist_url,
+                            headers=MyCloud.spoofed_headers,
+                            return_bytes=True).decode('ascii').split('\n')
+        ts_urls = [line for line in ts_urls if '.ts' in line]
+
+        ep_dir_url = ep_dir + '/hls/{}/'.format(quality.split('x')[1])
+        ts_urls = [ep_dir_url + url for url in ts_urls]
+        return [playlist_url] + ts_urls
