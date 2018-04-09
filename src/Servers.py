@@ -134,14 +134,15 @@ class ServerSpecificCrawler:
         episodes_to_download = [ep for ep in available_episodes if ep.ep_number in requested_episodes]
         # endregion
 
+        ep_fmt = 'ep{ep:03d}.{extension}'
         for download_url, ep in zip(self._travel_episodes(series_page_url, episodes_to_download), episodes_to_download):
             log('found download url for episode {}!'.format(ep.ep_number))
             if not os.path.exists(download_path):
                 os.makedirs(download_path)
             if type(download_url) is str:
-                download_file(download_url, os.path.join(download_path, "ep{}.mp4".format(ep.ep_number)), self.get_headers())
+                download_file(download_url, os.path.join(download_path, ep_fmt.format(ep=ep.ep_number, extension='mp4')), self.get_headers())
             else:
-                download_file_from_multiple_sources(download_url, os.path.join(download_path, "ep{}.ts".format(ep.ep_number)), self.get_headers())
+                download_file_from_multiple_sources(download_url, os.path.join(download_path, ep_fmt.format(ep=ep.ep_number, extension='ts')), self.get_headers())
 
         return
 
@@ -245,15 +246,17 @@ class F2(G3F4AndWhatever):
 
 class MyCloud(ServerSpecificCrawler):
     DOMAIN = 'https://mcloud.to'
-    spoofed_headers = {'Host': 'mcloud.to',
-                       'Origin': DOMAIN,
-                       'Referer': DOMAIN,
-                       'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
-                       'accept-encoding': 'gzip, deflate, br',
-                       'accept-language': 'en-US,en;q=0.9',
-                       'cache-control': 'max-age=0',
-                       'upgrade-insecure-requests': '1',
-                       'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'}
+    spoofed_headers = {
+        # 'Host': 'mcloud.to',
+        # 'Origin': DOMAIN,
+        'Referer': DOMAIN,
+        # 'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+        # 'accept-encoding': 'gzip, deflate, br',
+        # 'accept-language': 'en-US,en;q=0.9',
+        # 'cache-control': 'max-age=0',
+        # 'upgrade-insecure-requests': '1',
+        # 'user-agent': 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0.3282.186 Safari/537.36'
+    }
 
     def get_headers(self):
         return MyCloud.spoofed_headers
@@ -305,5 +308,13 @@ class MyCloud(ServerSpecificCrawler):
 
         ep_dir_url = ep_dir + '/hls/{}/'.format(quality.split('x')[1])
         ts_urls = [ep_dir_url + url for url in ts_urls]
+        print(ts_urls[1])
         # return [playlist_url] + ts_urls
         return ts_urls
+
+
+if __name__ == '__main__':
+    # test header spoofing
+    print(fetch_url('https://stream.mcloud.to/q13/i0/h0/p26/NdhlMSLfjNnSOYSuRpMROQ/1520571600/e/3/a/ll99nn/hls/720/720-0001.ts',
+                    MyCloud.spoofed_headers,
+                    return_bytes=True).decode(errors='ignore'))
