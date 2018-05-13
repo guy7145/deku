@@ -49,15 +49,11 @@ eps = episodes
 
 @no_exception
 def download(anime_name, episodes=None, path=None, *args, **kwargs):
-    if path is None:
-        path = os.getcwd()
     return deku.download_episodes(anime_name=anime_name, episodes_to_download=episodes, path=path, *args, **kwargs)
 
 
 @no_exception
 def download_by_url(anime_name, url, episodes=None, path=None, *args, **kwargs):
-    if path is None:
-        path = os.getcwd()
     return deku.download_episodes_by_url(anime_name=anime_name, url=url, path=path, episodes_to_download=episodes,
                                          *args, **kwargs)
 

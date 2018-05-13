@@ -1,5 +1,5 @@
 from Servers import *
-from src.deku_cli_api import *
+from src.deku import *
 
 
 def main():
@@ -11,7 +11,8 @@ def main():
     # print(fetch_url('http://httpbin.org/headers').replace('\\n', '\n'))
     # deku.download_episodes(anime_name='A Place Further Than The Universe', path='.', server=RapidVideo)
     # deku.download_episodes(anime_name='A Place Further Than The Universe', path='.', server=MyCloud)
-    download('A Place Further Than The Universe', server=MyCloud)
+    # get_video_links_by_name('A Place Further Than The Universe')
+    download_episodes('The Ancient Magus Bride', episodes_to_download=[24])
     return
 
 

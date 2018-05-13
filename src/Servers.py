@@ -51,15 +51,21 @@ class Episode:
                                                                 date=self.date_added)
 
 
+def close_ads(driver):
+    for tab in driver.window_handles:
+        driver.switch_to_window(tab)
+        sleep(1)
+        if '9anime' not in driver.current_url:
+            driver.close()
+    driver.switch_to_window(driver.window_handles[0])
+    return
+
+
 def getRidOfCoverDiv(driver):
     js = "getEventListeners(document.getElementsByClassName('cover')[0])['click'][0].listener({type: 'click'})"
     driver.find_elements_by_class_name('cover')[0].click()
-    driver.switch_to_window(driver.window_handles[1])
-    driver.close()
-    driver.switch_to_window(driver.window_handles[0])
-    sleep(3)
-    # driver.execute_script(js, [])
-    # print(driver.execute("getEventListeners", "document.getElementsByClassName('cover')[0]"))
+    close_ads(driver)
+    sleep(2)
     return
 
 
@@ -107,6 +113,9 @@ class ServerSpecificCrawler:
             yield self._find_download_url(self.driver.page_source)
 
     def download_episodes(self, series_page_url, requested_episodes, quality, download_path):
+        series_page_html = fetch_url(series_page_url)
+        available_episodes = self._find_episode_watch_links(series_page_html)
+
         # region quality
         if quality is None:
             quality = self.highest_quality()
@@ -116,23 +125,7 @@ class ServerSpecificCrawler:
         self.set_quality(quality)
         # endregion
 
-        series_page_html = fetch_url(series_page_url)
-        available_episodes = self._find_episode_watch_links(series_page_html)
-
-        # region inform the user in case some episodes are missing...
-        available_episodes_numbers = set([ep.ep_number for ep in available_episodes])
-        if requested_episodes is None:
-            requested_episodes = available_episodes_numbers
-        else:
-            requested_episodes = set(requested_episodes)
-            requested_but_not_available = requested_episodes.difference(available_episodes_numbers)
-            requested_and_available = requested_episodes.intersection(available_episodes_numbers)
-            if len(requested_but_not_available) > 0:
-                warning('episodes {} not available; downloading episodes {}'.format(requested_but_not_available,
-                                                                                    requested_and_available))
-
-        episodes_to_download = [ep for ep in available_episodes if ep.ep_number in requested_episodes]
-        # endregion
+        episodes_to_download = self.intersect_availible_and_requested_episodes(available_episodes, requested_episodes)
 
         ep_fmt = 'ep{ep:03d}.{extension}'
         for download_url, ep in zip(self._travel_episodes(series_page_url, episodes_to_download), episodes_to_download):
@@ -145,6 +138,35 @@ class ServerSpecificCrawler:
                 download_file_from_multiple_sources(download_url, os.path.join(download_path, ep_fmt.format(ep=ep.ep_number, extension='ts')), self.get_headers())
 
         return
+
+    def intersect_availible_and_requested_episodes(self, available_episodes, requested_episodes):
+        available_episodes_numbers = set([ep.ep_number for ep in available_episodes])
+        if requested_episodes is None:
+            requested_episodes = available_episodes_numbers
+        else:
+            requested_episodes = set(requested_episodes)
+            requested_but_not_available = requested_episodes.difference(available_episodes_numbers)
+            requested_and_available = requested_episodes.intersection(available_episodes_numbers)
+            if len(requested_but_not_available) > 0:
+                warning('episodes {} not available; downloading episodes {}'.format(requested_but_not_available,
+                                                                                    requested_and_available))
+        episodes_to_download = [ep for ep in available_episodes if ep.ep_number in requested_episodes]
+        return episodes_to_download
+
+    def get_video_urls(self, series_page_url, eps=None):
+        series_page_html = fetch_url(series_page_url)
+        available_episodes = self._find_episode_watch_links(series_page_html)
+
+        eps = self.intersect_availible_and_requested_episodes(available_episodes, eps)
+        links = []
+        for link in self._travel_episodes(series_page_url, eps):
+            print(link)
+            links.append(link)
+
+        for ep, link in zip(eps, links):
+            print("ep{}:\t{}".format(ep.ep_number, link))
+
+        return links
 
     def __repr__(self):
         return self.get_server_name()

@@ -11,11 +11,14 @@ from src.log import error, log, bold
 def download_episodes(anime_name, *args, **kwargs):
     log('fetching {}\'s series url...'.format(anime_name))
     series_url = find_series_url_by_name(anime_name)
-    return download_episodes_by_url(anime_name=anime_name, url=series_url, *args, **kwargs)
+    return download_episodes_by_url(anime_name, url=series_url, *args, **kwargs)
 
 
 @sanitized
-def download_episodes_by_url(anime_name, url, path, episodes_to_download=None, player_quality=None, server=RapidVideo):
+def download_episodes_by_url(anime_name, url, path=None, episodes_to_download=None, player_quality=None, server=RapidVideo):
+    if path is None:
+        path = os.getcwd()
+
     path = os.path.join(path, anime_name)
     server = server()
     log('downloading {} episodes {} from server {} to path \'{}\''.format(anime_name,
@@ -32,6 +35,15 @@ def download_episodes_by_url(anime_name, url, path, episodes_to_download=None, p
     finally:
         server.close()
     return
+
+
+def get_video_links_by_url(series_page_url, eps=None, server=RapidVideo):
+    return server().get_video_urls(series_page_url=series_page_url, eps=eps)
+
+
+def get_video_links_by_name(anime_name, *args, **kwargs):
+    return get_video_links_by_url(series_page_url=find_series_url_by_name(anime_name), *args, **kwargs)
+
 
 
 def debug_src(name):

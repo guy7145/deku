@@ -19,8 +19,8 @@ def sanitize_name(name):
 
 
 def sanitized(func):
-    def sanitized_func(name):
-        return func(sanitize_name(name))
+    def sanitized_func(name, *args, **kwargs):
+        return func(sanitize_name(name), *args, **kwargs)
     return sanitized_func
 
 
