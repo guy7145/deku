@@ -58,7 +58,7 @@ def generate_chrome_driver():
     options.add_argument("--incognito")
     # options.add_argument("--enable-devtools-experiments")
     options.add_argument("--disable-extensions")
-    # options.add_argument("--headless")
+    options.add_argument("--headless")
 
     capabilities = webdriver.DesiredCapabilities.CHROME
     # capabilities['javascriptEnabled'] = True
